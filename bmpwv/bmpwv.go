@@ -4,8 +4,8 @@ package main
 
 import (
 	// Alien imports
-	"github.com/blackfriday" // Russ Ross 2012-11-22 version
 	"github.com/hotei/bmp"
+	"github.com/russross/blackfriday" // Russ Ross 2012-11-22 version
 	// go 1.X only below here
 	//"bufio"
 	"bytes"
@@ -18,14 +18,14 @@ import (
 	"os"
 	"path/filepath"
 
-//"time"
+	//"time"
 )
 
 const (
 	hostIPstr  = "127.0.0.1"
 	portNum    = 8282
-	bmpURL = "/bmp/"
-	mdURL  = "/md/"
+	bmpURL     = "/bmp/"
+	mdURL      = "/md/"
 	serverRoot = "/www/"
 )
 
@@ -70,7 +70,7 @@ func checkMdName(pathname string, info os.FileInfo, err error) error {
 		//fmt.Printf("found %s %s\n", pathname, filepath.Ext(pathname))
 		ext := filepath.Ext(pathname)
 		if ext == ".md" || ext == ".markdown" || ext == ".mdown" {
-		//fmt.Printf("appending\n")
+			//fmt.Printf("appending\n")
 			g_fileNames = append(g_fileNames, pathname)
 		}
 	}
@@ -88,7 +88,7 @@ func makeBmpLine(s string) []byte {
 func makeMdLine(s string) []byte {
 	workDir := serverRoot + mdURL[1:]
 	s = s[len(workDir):]
-	return []byte(fmt.Sprintf("<a href=\"%s\">%s</a><br>",s,s))
+	return []byte(fmt.Sprintf("<a href=\"%s\">%s</a><br>", s, s))
 }
 
 func init() {
@@ -114,11 +114,10 @@ func init() {
 	}
 	t := []byte(`</body></html>`)
 	myBmpDir = append(myBmpDir, t...)
-	
 
 	pathName = serverRoot + mdURL[1:]
 	g_fileNames = make([]string, 0, 20)
-	myMdDir =[]byte(`<html><!-- comment --><head><title>Test MD package</title></head><body>click to read<br>`) // {}
+	myMdDir = []byte(`<html><!-- comment --><head><title>Test MD package</title></head><body>click to read<br>`) // {}
 	stats, err = os.Stat(pathName)
 	if err != nil {
 		fmt.Printf("Can't get fileinfo for %s\n", pathName)
@@ -157,14 +156,13 @@ func mdHandler(w http.ResponseWriter, r *http.Request) {
 		output, err = ioutil.ReadFile(fileName)
 		if err != nil {
 			errStr := fmt.Sprintf("mdHandler: %v\n", err)
-			fmt.Printf("%s\n",errStr)
+			fmt.Printf("%s\n", errStr)
 			w.Write([]byte(fmt.Sprintf("404 - Not Found\n")))
 			return
 		}
 	}
 	w.Write(output)
 }
-
 
 func htmlFromMd(fname string) []byte {
 	var output []byte
@@ -189,9 +187,9 @@ func bmpHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	workDir := serverRoot + bmpURL[1:]
-	fmt.Printf("workDir(%s)\n",workDir)
-	fmt.Printf("r.URL.Path(%s)\n",r.URL.Path)
-	imageName := workDir+r.URL.Path[len(bmpURL):]
+	fmt.Printf("workDir(%s)\n", workDir)
+	fmt.Printf("r.URL.Path(%s)\n", r.URL.Path)
+	imageName := workDir + r.URL.Path[len(bmpURL):]
 	fmt.Printf("bmpHandler: imageName = %s\n", imageName)
 	bf, err := os.Open(imageName)
 	if err != nil {
@@ -201,19 +199,18 @@ func bmpHandler(w http.ResponseWriter, r *http.Request) {
 	img, err := bmp.Decode(bf)
 	if err != nil {
 		fmt.Printf("bmpHandler: bmp decode failed for %s\n", imageName)
-		w.Write([]byte(fmt.Sprintf("Decode failed for %s\n",imageName)))
-		return	
+		w.Write([]byte(fmt.Sprintf("Decode failed for %s\n", imageName)))
+		return
 	}
 	b := make([]byte, 0, 10000)
 	wo := bytes.NewBuffer(b)
 	err = png.Encode(wo, img)
 	if err != nil {
 		fmt.Printf("bmpHandler: png encode failed for %s\n", imageName)
-		return	
+		return
 	}
 	w.Write(wo.Bytes())
 }
-
 
 // ---------------------------------------------------------------------------     M A I N
 
@@ -229,5 +226,3 @@ func main() {
 		log.Printf("bmpwv: error running webserver %v", err)
 	}
 }
-
-
